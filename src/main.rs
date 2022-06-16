@@ -12,6 +12,8 @@ struct App {
     height: i32,
     image: Option<RetainedImage>,
     circles: [(i32, i32, i32); 3],
+    show_first_merge: bool,
+    show_second_merge: bool,
 }
 
 impl App {
@@ -66,12 +68,14 @@ impl App {
                     circles[second].2 as f32,
                 ),
             );
-            //draw_hollow_circle_mut(
-            //    &mut image,
-            //    (x as i32, y as i32),
-            //    radius as i32,
-            //    Rgb([0, 255, 0]),
-            //);
+            if self.show_first_merge {
+                draw_hollow_circle_mut(
+                    &mut image,
+                    (x as i32, y as i32),
+                    radius as i32,
+                    Rgb([0, 255, 0]),
+                );
+            }
             let (x, y, radius) = merge_sphere(
                 (x, y, radius),
                 (
@@ -80,12 +84,14 @@ impl App {
                     circles[last].2 as f32,
                 ),
             );
-            draw_hollow_circle_mut(
-                &mut image,
-                (x as i32, y as i32),
-                radius as i32,
-                Rgb([255, 0, 0]),
-            )
+            if self.show_second_merge {
+                draw_hollow_circle_mut(
+                    &mut image,
+                    (x as i32, y as i32),
+                    radius as i32,
+                    Rgb([255, 0, 0]),
+                )
+            }
         }
         let mut buffer = Vec::new();
         image
@@ -99,6 +105,8 @@ impl App {
             circles: [(150, 150, 100), (350, 130, 30), (120, 330, 80)],
             width,
             height,
+            show_first_merge: true,
+            show_second_merge: false,
         };
         r.build_image();
         r
@@ -132,6 +140,25 @@ impl epi::App for App {
                     });
                 });
             }
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.add(Label::new("show first merge"));
+                if ui
+                    .add(egui::Checkbox::new(&mut self.show_first_merge, ""))
+                    .changed()
+                {
+                    should_build_image = true;
+                }
+            });
+            ui.horizontal(|ui| {
+                ui.add(Label::new("show second merge"));
+                if ui
+                    .add(egui::Checkbox::new(&mut self.show_second_merge, ""))
+                    .changed()
+                {
+                    should_build_image = true;
+                }
+            });
         });
         if should_build_image {
             self.build_image();
