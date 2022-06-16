@@ -116,50 +116,52 @@ impl App {
 impl epi::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &epi::Frame) {
         let mut should_build_image = false;
-        egui::SidePanel::new(Side::Left, "Circle Config").show(ctx, |ui| {
-            for (i, (x, y, radius)) in self.circles.iter_mut().enumerate() {
-                ui.add(Label::new(format!("Circle {}", i)));
-                ui.indent("Circle", |ui| {
-                    ui.horizontal(|ui| {
-                        ui.add(Label::new("x"));
-                        if ui.add(Slider::new(x, 0..=self.width)).changed() {
-                            should_build_image = true;
-                        }
+        egui::SidePanel::new(Side::Left, "Circle Config")
+            .resizable(false)
+            .show(ctx, |ui| {
+                for (i, (x, y, radius)) in self.circles.iter_mut().enumerate() {
+                    ui.group(|ui| {
+                        ui.add(Label::new(format!("Circle {}", i)));
+                        ui.horizontal(|ui| {
+                            ui.add(Label::new("x"));
+                            if ui.add(Slider::new(x, 0..=self.width)).changed() {
+                                should_build_image = true;
+                            }
+                        });
+                        ui.horizontal(|ui| {
+                            ui.add(Label::new("y"));
+                            if ui.add(Slider::new(y, 0..=self.height)).changed() {
+                                should_build_image = true;
+                            }
+                        });
+                        ui.horizontal(|ui| {
+                            ui.add(Label::new("radius"));
+                            if ui.add(DragValue::new(radius)).changed() {
+                                should_build_image = true;
+                            }
+                        });
                     });
-                    ui.horizontal(|ui| {
-                        ui.add(Label::new("y"));
-                        if ui.add(Slider::new(y, 0..=self.height)).changed() {
-                            should_build_image = true;
-                        }
-                    });
-                    ui.horizontal(|ui| {
-                        ui.add(Label::new("radius"));
-                        if ui.add(DragValue::new(radius)).changed() {
-                            should_build_image = true;
-                        }
-                    });
+                }
+                ui.separator();
+                ui.horizontal(|ui| {
+                    ui.add(Label::new("show first merge"));
+                    if ui
+                        .add(egui::Checkbox::new(&mut self.show_first_merge, ""))
+                        .changed()
+                    {
+                        should_build_image = true;
+                    }
                 });
-            }
-            ui.separator();
-            ui.horizontal(|ui| {
-                ui.add(Label::new("show first merge"));
-                if ui
-                    .add(egui::Checkbox::new(&mut self.show_first_merge, ""))
-                    .changed()
-                {
-                    should_build_image = true;
-                }
+                ui.horizontal(|ui| {
+                    ui.add(Label::new("show second merge"));
+                    if ui
+                        .add(egui::Checkbox::new(&mut self.show_second_merge, ""))
+                        .changed()
+                    {
+                        should_build_image = true;
+                    }
+                });
             });
-            ui.horizontal(|ui| {
-                ui.add(Label::new("show second merge"));
-                if ui
-                    .add(egui::Checkbox::new(&mut self.show_second_merge, ""))
-                    .changed()
-                {
-                    should_build_image = true;
-                }
-            });
-        });
         if should_build_image {
             self.build_image();
         };
